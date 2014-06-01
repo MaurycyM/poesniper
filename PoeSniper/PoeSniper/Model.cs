@@ -48,50 +48,55 @@ namespace PoeSniper
         public enum ItemType
         {
             Helmet,
-            BodyArmor,
-            Belt,
-            Boots,
-            Gloves,
-            Amulet,
-            Ring,
-            Shield,
+            OneHandAxe,
+            Flask,
+            OneHandSword,
+            BodyArmour,
+            Map,
+            OneHandMace,
             Quiver,
-            OneHandedSword,
-            OneHandedAxe,
-            OneHandedMace,
-            Dagger,
-            Wand,
-            TwoHandedSword,
-            TwoHandedAxe,
-            TwoHandedMace,
-            Staff,
+            Amulet,
+            FishingRod,
+            Sceptre,
+            TwoHandAxe,
+            Gem,
+            TwoHandSword,
             Bow,
-        }
-
-        public enum ItemBase
-        {
-            Foo,
-            Bar,
-            // TODO
-        }
+            Gloves,
+            VaalFragment,
+            Claw,
+            TwoHandMace,
+            Dagger,
+            Shield,
+            Wand,
+            Boots,
+            Currency,
+            Ring,
+            Belt,
+            Staff,
+        };
 
         public class Item
         {
             public int Id { get; set; }
             public string Name { get; set; }
             public ItemType Type { get; set; }
-            public ItemBase Base { get; set; }
+            public string Base { get; set; }
+
+            public bool IsVerified { get; set; }
+            public bool IsIdentified { get; set; }
+            public bool IsCorrupted { get; set; }
+            
             public ItemRarity Rarity { get; set; }
             public int Quality { get; set; } 
             public Requirements Requirements { get; set; }
-            public MagicProperty Implicit { get; set; }
-            public ICollection<Socket> Sockets { get; set; }
-            public ICollection<MagicProperty> MagicProperties { get; set; }
+            public MagicProperty ImplicitProperty { get; set; }
+            public List<Socket> Sockets { get; set; }
+            public List<MagicProperty> ExplicitProperties { get; set; }
 
             public League League { get; set; }
             public ShopThread ShopThread { get; set; }
             public Price Price { get; set; }
-            public bool Isverified { get; set; } 
         }
 
         public class Price

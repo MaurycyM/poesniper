@@ -199,7 +199,7 @@
     "Crusader Plate", 
     "Crypt Armour", 
     "Cutthroat's Garb",
-     "Desert Brigandine", 
+    "Desert Brigandine", 
     "Destiny Leather", 
     "Destroyer Regalia", 
     "Devout Chainmail", 
@@ -395,7 +395,7 @@
     "Paua Amulet", 
     "Turquoise Amulet"
 ], 
-"Fishing Rods": [
+"Fishing Rod": [
     "Fishing Rod"
 ], 
 "Sceptre": [
@@ -510,8 +510,8 @@
     "Faster Casting", 
     "Faster Projectiles", 
     "Fire Penetration", 
-    "Fire Trap
-    ", "Fireball", 
+    "Fire Trap", 
+    "Fireball", 
     "Firestorm", 
     "Flame Totem", 
     "Flameblast", 
@@ -740,8 +740,8 @@
     "Wyrmscale Gauntlets", 
     "Zealot Gloves"
 ], 
-"Vaal Fragments": 
-    ["Mortal Grief", 
+"Vaal Fragment": [
+    "Mortal Grief", 
     "Mortal Hope", 
     "Mortal Ignorance", 
     "Mortal Rage", 
@@ -795,7 +795,6 @@
     "Totemic Maul", 
     "Tribal Maul"
 ], 
-
 "Dagger": [
     "Ambusher", 
     "Boot Blade", 

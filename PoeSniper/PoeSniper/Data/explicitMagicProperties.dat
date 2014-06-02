@@ -1,72 +1,78 @@
-to Strength
-to maximum Life
-% increased Rarity of Items found
-% to Fire Resistance
-% to Cold Resistance
-% to Lightning Resistance
-% increased Movement Speed
-% increased Spell Damage
-Min Physical Damage
-Max Physical Damage
-% increased Fire Damage
-Min Lightning Damage
-Max Lightning Damage
-% increased Attack Speed
-Life Regenerated per second
-% increased Physical Damage
-Min Cold Damage
-Max Cold Damage
-to maximum Mana
-to Evasion Rating
-% increased Cold Damage
-to Accuracy Rating
-to Dexterity
-% of Physical Attack Damage Leeched as Mana
-to Intelligence
-% increased Accuracy Rating
-% increased Energy Shield
-to maximum Energy Shield
-% increased Light Radius
-% increased Armour
-% increased Evasion Rating
-to Armour
-% increased Block and Stun Recovery
-% to Chaos Resistance
-% reduced Attribute Requirements
-% increased Mana Regeneration Rate
-% to all Elemental Resistances
-% increased Elemental Damage with Weapons
-% increased Lightning Damage
-% increased maximum Energy Shield
-Mana Gained on Kill
-Life gained for each enemy hit by your Attacks
-Min Fire Damage
-Max Fire Damage
-% increased Critical Strike Chance
-Life gained on Kill
-% increased Armour and Evasion
-to Level of Melee Gems in this item
-% of Physical Attack Damage Leeched as Life
-to all Attributes
-% increased Global Critical Strike Multiplier
-% reduced Enemy Stun Threshold
-% increased Stun Duration on enemies
-to Level of Fire Gems in this item
-% increased Critical Strike Chance for Spells
-% increased Projectile Speed
-to Level of Cold Gems in this item
-to Level of Gems in this item
-% increased Flask Mana Recovery rate
-% increased Flask effect duration
-Reflects Physical Damage to Melee Attackers
-% increased Evasion and Energy Shield
-% increased Armour and Energy Shield
-% increased Global Critical Strike Chance
-to Level of Minion Gems in this item
-% increased Flask Charges gained
-% increased Flask Life Recovery rate
-% reduced Flask Charges used
-% additional Block Chance
-% increased Cast Speed
-to Level of Lightning Gems in this item
-to Level of Bow Gems in this item
+﻿X Min Cold Damage
+X Max Cold Damage
+X% increased Global Critical Strike Multiplier
++X% to Cold Resistance
+X% increased Accuracy Rating
+X% increased Light Radius
++X to maximum Life
++X to maximum Mana
++X% to Fire Resistance
++X% to Lightning Resistance
+X% increased Global Critical Strike Chance
++X% to Chaos Resistance
+X% of Physical Attack Damage Leeched as Mana
+X Min Physical Damage
+X Max Physical Damage
++X to Dexterity
+X% increased maximum Energy Shield
+X% of Physical Attack Damage Leeched as Life
+X% increased Fire Damage
++X to maximum Energy Shield
++X to Strength
+X% increased Block and Stun Recovery
+Reflects X Physical Damage to Melee Attackers
+X% reduced Flask Charges used
+X% increased Flask Mana Recovery rate
++X to Armour
+X% reduced Enemy Stun Threshold
+X Life Regenerated per second
+X% increased Flask Life Recovery rate
+X% increased Flask Charges gained
+X% increased Stun Duration on enemies
+X% increased Flask effect duration
+X% increased Elemental Damage with Weapons
+X Min Lightning Damage
+X Max Lightning Damage
++X to Accuracy Rating
+X% increased Rarity of Items found
++X% to all Elemental Resistances
++X Mana Gained on Kill
+X Min Fire Damage
+X Max Fire Damage
++X to Intelligence
++X Life gained on Kill
+X% increased Attack Speed
+X% increased Cast Speed
+X% increased Evasion Rating
+X% increased Movement Speed
+X% increased Evasion and Energy Shield
++X to Evasion Rating
+X% increased Energy Shield
+X% reduced Attribute Requirements
+X% increased Armour
+X% increased Armour and Evasion
+X% increased Spell Damage
+X% increased Critical Strike Chance for Spells
+X% increased Armour and Energy Shield
+X% increased Physical Damage
+X% increased Cold Damage
+X% increased Mana Regeneration Rate
++X to all Attributes
+X% increased Lightning Damage
++X Life gained for each enemy hit by your Attacks
+X% increased Critical Strike Chance
+X% increased Projectile Speed
++X to Level of Minion Gems in this item
++X to Level of Fire Gems in this item
++X to Level of Bow Gems in this item
++X to Level of Melee Gems in this item
++X to Level of Cold Gems in this item
++X to Level of Gems in this item
++X to Level of Lightning Gems in this item
+X% additional Block Chance
+
+
+AAA
+AAA
+AAA
+

@@ -1,28 +1,50 @@
-% increased Accuracy Rating
-% increased Stun Duration on enemies
-Life gained for each enemy hit by your Attacks
-% Chance to Block
-to maximum Life
-% to Cold Resistance
-% to Chaos Resistance
-to maximum Energy Shield
-% increased Rarity of Items found
-% increased Mana Regeneration Rate
-to Dexterity
-% increased Block and Stun Recovery
-% increased Spell Damage
-% to all Elemental Resistances
-% chance of Arrows Piercing
-to all Attributes
+﻿X% increased Mana Regeneration Rate
+X Life Regenerated per second
++X to Dexterity
+X% increased Rarity of Items found
++X to all Attributes
++X to maximum Life
+X% increased Stun Duration on enemies
+X% increased Block and Stun Recovery
+X Min Physical Damage
+X Max Physical Damage
+X% increased Spell Damage
+X% of Physical Attack Damage Leeched as Life
+X% increased Block Recovery
++X Life gained for each enemy hit by your Attacks
+X Min Fire Damage to attacks with Bows
+X Max Fire Damage to attacks with Bows
+X% increased Global Critical Strike Chance
+X% increased Accuracy Rating
+X% increased Elemental Damage with Weapons
+X% Chance to Block
++X to Strength and Intelligence
++X to Dexterity and Intelligence
+X% increased Physical Damage
++X to maximum Energy Shield
++X to Strength
++X% to all Elemental Resistances
++X% to Lightning Resistance
++X% to Fire Resistance
++X% to Fire and Cold Resistances
++X% to Fire and Lightning Resistances
++X% to Cold and Lightning Resistances
+X% increased Movement Speed
++X to maximum Mana
++X to Strength and Dexterity
++X% to Chaos Resistance
++X% to Cold Resistance
+X% increased Global Critical Strike Multiplier
+X% increased Elemental Damage
+X Min Physical Damage to attacks with Bows
+X Max Physical Damage to attacks with Bows
+X% increased Critical Strike Chance
+Reflects X Physical Damage to Melee Attackers
++X to Intelligence
+X% chance of Arrows Piercing
 Has 1 Socket
-% to Cold and Lightning Resistances
-% increased Global Critical Strike Multiplier
-% increased Global Critical Strike Chance
-Life Regenerated per second
-% increased Physical Damage
-to Strength
-% to Lightning Resistance
-% to Fire Resistance
-% to Fire and Lightning Resistances
-Reflects Physical Damage to Melee Attackers
-% increased Block Recovery
+
+
+AAA
+AAA
+AAA

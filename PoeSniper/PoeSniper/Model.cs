@@ -22,14 +22,6 @@ namespace PoeSniper
             Invasion,
         }
         
-        public enum ItemRarity
-        {
-            Normal,
-            Magic,
-            Rare,
-            Unique,
-        };
-
         public enum SocketColor
         {
             Red,
@@ -87,22 +79,23 @@ namespace PoeSniper
             public bool IsIdentified { get; set; }
             public bool IsCorrupted { get; set; }
             
-            public ItemRarity Rarity { get; set; }
             public int Quality { get; set; } 
             public Requirements Requirements { get; set; }
-            public MagicProperty ImplicitProperty { get; set; }
-            public List<Socket> Sockets { get; set; }
+            public List<MagicProperty> ImplicitProperties { get; set; }
             public List<MagicProperty> ExplicitProperties { get; set; }
+            public List<GemSocket> Sockets { get; set; }
 
             public League League { get; set; }
             public ShopThread ShopThread { get; set; }
             public Price Price { get; set; }
+
+            public DateTime PostDate { get; set; }
         }
 
         public class Price
         {
             public Currency Currency { get; set; }
-            public int Amount { get; set; }
+            public decimal Amount { get; set; }
         }
 
         public class Weapon : Item
@@ -118,11 +111,14 @@ namespace PoeSniper
             public int MinChaosDamage { get; set; }
             public int MaxChaosDamage { get; set; }
 
-            public int PhysicalDps { get; set; }
-            public int ElementalDps { get; set; }
-            public int Dps { get; set; }
-            public int PhysicalDpsWithMaxQuality { get; set; }
-            public int DpsWithMaxQuality { get; set; }
+            public decimal CriticalStrikeChance { get; set; }
+            public decimal AttacksPerSecond { get; set; }
+
+            public decimal PhysicalDps { get; set; }
+            public decimal ElementalDps { get; set; }
+            public decimal Dps { get; set; }
+            public decimal PhysicalDpsWithMaxQuality { get; set; }
+            public decimal DpsWithMaxQuality { get; set; }
         }
 
         public class Armor : Item
@@ -148,13 +144,12 @@ namespace PoeSniper
             public int Value { get; set; }
         }
 
-        public class Socket
+        public class GemSocket
         {
             public int Id { get; set; }
             public SocketColor Color { get; set; }
             public bool isLinked { get; set; }
         }
-
 
         public class Forum
         {
@@ -173,6 +168,113 @@ namespace PoeSniper
             public string SellerIgn { get; set; }
             public DateTime LastUpdate { get; set; }
             public ICollection<Item> Items { get; set; }
+        }
+
+        public class LookingForItem
+        {
+            public int Id { get; set; }
+            public bool? isCorrupted { get; set; }
+            public League League { get; set; }
+            public LookingForItemType ItemType { get; set; }
+            public Price MaxPrice { get; set; }
+            public LookingForRequirements MaxRequirements { get; set; }
+            public List<LookingForMagicProperty> ImplicitProperties { get; set; }
+            public List<LookingForMagicProperty> ExplicitProperties { get; set; }
+            public LookingForItemSockets Sockets { get; set; }
+        }
+
+        public class LookingForRequirements
+        {
+            public int? MinLevel { get; set; }
+            public int? MaxLevel { get; set; }
+            public int? MinStrength { get; set; }
+            public int? MaxStrength { get; set; }
+            public int? MinDexterity { get; set; }
+            public int? MaxDexterity { get; set; }
+            public int? MinIntelligence { get; set; }
+            public int? MaxIntelligence { get; set; }
+        }
+
+        public class LookingForMagicProperty
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int? MinValue { get; set; }
+            public int? MaxValue { get; set; }
+        }
+
+        public class LookingForItemSockets
+        {
+            public int? MinNumberOfLinks { get; set; }
+            public int? MaxNumberOfLinks { get; set; }
+            public int? MinNmberOfRedSockets { get; set; }
+            public int? MaxNmberOfRedSockets { get; set; }
+            public int? MinNmberOfGreenSockets { get; set; }
+            public int? MaxNmberOfGreenSockets { get; set; }
+            public int? MinNmberOfBlueSockets { get; set; }
+            public int? MaxNmberOfBlueSockets { get; set; }
+        }
+
+        public class LookingForWeaponProperties
+        {
+            public decimal? MinCriticalStrikeChance { get; set; }
+            public decimal? MaxCriticalStrikeChance { get; set; }
+            public decimal? MinAttacksPerSecond { get; set; }
+            public decimal? MaxAttacksPerSecond { get; set; }
+
+            public decimal? MinPhysicalDps { get; set; }
+            public decimal? MaxPhysicalDps { get; set; }
+            public decimal? MinElementalDps { get; set; }
+            public decimal? MaxElementalDps { get; set; }
+            public decimal? MinDps { get; set; }
+            public decimal? MaxDps { get; set; }
+            public decimal? MinPhysicalDpsWithMaxQuality { get; set; }
+            public decimal? MaxPhysicalDpsWithMaxQuality { get; set; }
+            public decimal? MinDpsWithMaxQuality { get; set; }
+            public decimal? MaxDpsWithMaxQuality { get; set; }
+        }
+
+        public class LookingForArmorProperties
+        {
+            public int? MinArmour { get; set; }
+            public int? MaxArmour { get; set; }
+            public int? MinEvasion { get; set; }
+            public int? MaxEvasion { get; set; }
+            public int? MinEnergyShield { get; set; }
+            public int? MaxEnergyShield { get; set; }
+        }
+
+        public enum LookingForItemType
+        {
+            Helmet,
+            OneHandAxe,
+            //Flask,
+            OneHandSword,
+            BodyArmour,
+            //Map,
+            OneHandMace,
+            Quiver,
+            Amulet,
+            FishingRod,
+            Sceptre,
+            TwoHandAxe,
+            //Gem,
+            TwoHandSword,
+            Bow,
+            Gloves,
+            //VaalFragment,
+            Claw,
+            TwoHandMace,
+            Dagger,
+            Shield,
+            Wand,
+            Boots,
+            //Currency,
+            Ring,
+            Belt,
+            Staff,
+            OneHandWeapon,
+            TwoHandWeapon,
         }
     }
 }

@@ -13,17 +13,19 @@ namespace PoeSniper
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            var fetcher = new ShopThreadFetcher();
-            var result = fetcher.FetchShopThreads(235, DateTime.Now.AddMinutes(-20));
-            result.Wait();
+            var forumParser = new ForumParser();
+            var task = forumParser.UpdateForums();
+            task.Wait();
+            //var result = forumParser.GetNewShopThreads(235, DateTime.Now.AddMinutes(-5));
+            //result.Wait();
 
-            var itemFetcher = new ItemFetcher();
-            foreach (var shopThreadId in result.Result)
-            {
-                var items = itemFetcher.FetchItems(@"http://www.pathofexile.com/forum/view-thread/" + shopThreadId);
-                items.Wait();
+            //var threadParser = new ThreadParser();
+            //foreach (var shopThread in result.Result)
+            //{
+            //    var items = threadParser.ParseThread(@"http://www.pathofexile.com/forum/view-thread/" + shopThread.Item1, shopThread.Item2);
+            //    items.Wait();
 
-            }
+            //}
 
             Console.WriteLine(sw.Elapsed);
         }

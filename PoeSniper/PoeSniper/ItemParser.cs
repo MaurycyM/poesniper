@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace PoeSniper
 {
-    public class ItemTextParser
+    public class ItemParser
     {
         private string[] _weapons = new string[] 
         { 
@@ -49,13 +49,20 @@ namespace PoeSniper
         //private List<string> staticCorruptedImplictProperties = new List<string>();
         //private List<string> staticUniqueItemMagicProperties = new List<string>();
 
+        private class WeaponDamageJsonObject
+        {
+            public int min { get; set; }
+            public int max { get; set; }
+        }
+
         private MagicPropertiesParser _magicPropertiesParser;
         private SocketsParser _socketsParser;
         private Dictionary<string, string> _itemBaseTypeMapping = new Dictionary<string, string>();
         private string[] _itemPrefixes;
         private string[] _itemSuffixes;
+        private Dictionary<string, WeaponDamageJsonObject> _weaponBaseDamage;
 
-        public ItemTextParser()
+        public ItemParser()
         {
             _magicPropertiesParser = new MagicPropertiesParser();
             _socketsParser = new SocketsParser();
@@ -65,6 +72,9 @@ namespace PoeSniper
             var itemBasesString = File.ReadAllText(@"Data\itemBases.dat");
             var itemBases = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(itemBasesString);
             _itemBaseTypeMapping = itemBases.SelectMany(i => i.Value, (o, i) => new { type = o.Key, item = i }).ToDictionary(k => k.item, e => e.type);
+
+            var weaponBaseDamage = File.ReadAllText(@"Data\weaponBaseDamage.dat");
+            _weaponBaseDamage = JsonConvert.DeserializeObject<Dictionary<string, WeaponDamageJsonObject>>(weaponBaseDamage);
 
             //staticCorruptedImplictProperties = File.ReadAllLines(@"Data/staticCorruptedImplicitProperties.dat").ToList();
             //staticUniqueItemMagicProperties = File.ReadAllLines(@"Data/staticUniqueItemMagicProperties.dat").ToList();
@@ -78,34 +88,33 @@ namespace PoeSniper
 
         // try to find item base - first match the name with the dictionary of item bases (for normal, rares and uniques)
         // if that doesn't work, try to trim prefix and suffix (for magic items)
-        private bool TryFindItemBaseType(string itemBase, out string itemType)
+        private bool TryFindItemBaseType(string typeLine, out string itemType, out string itemBase)
         {
-            itemBase = itemBase.Replace("Superior ", "");
+            itemBase = typeLine.Replace("Superior ", "");
             if (_itemBaseTypeMapping.TryGetValue(itemBase, out itemType))
             {
                 return true;
             }
 
-            var magicItemBase = itemBase;
             foreach (var prefix in _itemPrefixes)
             {
-                if (magicItemBase.StartsWith(prefix + " "))
+                if (itemBase.StartsWith(prefix + " "))
                 {
-                    magicItemBase = magicItemBase.Substring(prefix.Length + 1);
+                    itemBase = itemBase.Substring(prefix.Length + 1);
                     break;
                 }
             }
 
             foreach (var suffix in _itemSuffixes)
             {
-                if (magicItemBase.EndsWith(" " + suffix))
+                if (itemBase.EndsWith(" " + suffix))
                 {
-                    magicItemBase = magicItemBase.Substring(0, magicItemBase.IndexOf(" " + suffix));
+                    itemBase = itemBase.Substring(0, itemBase.IndexOf(" " + suffix));
                     break;
                 }
             }
 
-            if (_itemBaseTypeMapping.TryGetValue((string)magicItemBase, out itemType))
+            if (_itemBaseTypeMapping.TryGetValue((string)itemBase, out itemType))
             {
                 return true;
             }
@@ -130,7 +139,8 @@ namespace PoeSniper
 
             Item result = null;
             string itemType;
-            if (TryFindItemBaseType((string)itemJson.typeLine, out itemType))
+            string itemBase;
+            if (TryFindItemBaseType((string)itemJson.typeLine, out itemType, out itemBase))
             {
                 if (_weapons.Contains(itemType))
                 {
@@ -153,12 +163,12 @@ namespace PoeSniper
 
                 result.Name = itemJson.name;
                 result.Type = (ItemType)Enum.Parse(typeof(ItemType), (string)itemType.Replace(" ", ""));
-                result.Base = itemJson.typeLine;
+                result.Base = itemBase;
                 result.IsVerified = itemJson.verified;
                 result.IsIdentified = itemJson.identified;
                 result.IsCorrupted = itemJson.corrupted;
                 result.Requirements = this.ParseRequirements(itemJson.requirements);
-                result.ImplicitProperties = new List<MagicProperty>();
+                result.MagicProperties = new List<MagicProperty>();
 
                 if (itemJson.properties != null)
                 {
@@ -174,30 +184,29 @@ namespace PoeSniper
                 {
                     if (itemJson.corrupted)
                     {
-                        var implicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.implicitMods, corruptedImplicitProps, true, implicitProps);
-                        result.ImplicitProperties.AddRange(implicitProperties);
+                        var implicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.implicitMods, corruptedImplicitProps, true, true, implicitProps);
+                        result.MagicProperties.AddRange(implicitProperties);
                     }
                     else
                     {
-                        var implicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.implicitMods, implicitProps, false, null);
-                        result.ImplicitProperties.AddRange(implicitProperties);
+                        var implicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.implicitMods, implicitProps, false, true, null);
+                        result.MagicProperties.AddRange(implicitProperties);
                     }
                 }
 
-                result.ExplicitProperties = new List<MagicProperty>();
                 if (result.Type != ItemType.Currency && result.Type != ItemType.Gem && result.Type != ItemType.Map && result.Type != ItemType.VaalFragment)
                 {
                     if (itemJson.explicitMods != null)
                     {
                         if (itemJson.flavourText != null)
                         {
-                            var explicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.explicitMods, uniqueItemProps, true, explicitProps);
-                            result.ExplicitProperties.AddRange(explicitProperties);
+                            var explicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.explicitMods, uniqueItemProps, true, false, explicitProps);
+                            result.MagicProperties.AddRange(explicitProperties);
                         }
                         else
                         {
-                            var explicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.explicitMods, explicitProps, false, null);
-                            result.ExplicitProperties.AddRange(explicitProperties);
+                            var explicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.explicitMods, explicitProps, false, false, null);
+                            result.MagicProperties.AddRange(explicitProperties);
                         }
                     }
                 }
@@ -216,7 +225,7 @@ namespace PoeSniper
                 }
                 else if (armor != null)
                 {
-
+                    ParseArmorSpecificProperties(armor, itemJson.properties);
                 }
 
 
@@ -239,6 +248,11 @@ namespace PoeSniper
             //File.WriteAllLines(@"Data/implicitMagicProperties.dat", implicitProps);
             //File.WriteAllLines(@"Data/corruptedImplicitProperties.dat", corruptedImplicitProps);
             //File.WriteAllLines(@"Data/uniqeItemMagicProperties.dat", uniqueItemProps);
+
+            if (result.Name == "Empyrean Brand")
+            {
+                Console.WriteLine("fdfsd");
+            }
 
             return result;
 
@@ -309,19 +323,59 @@ namespace PoeSniper
 
             weapon.Dps = weapon.PhysicalDps + weapon.ElementalDps;
 
-            var minPhysicalDamageAddedProperty = weapon.ExplicitProperties.Where(p => p.Name == "Adds X Min Physical Damage").SingleOrDefault();
-            var maxPhysicalDamageAddedProperty = weapon.ExplicitProperties.Where(p => p.Name == "Adds X Max Physical Damage").SingleOrDefault();
-            var increasedPhysicalDamageProperty = weapon.ExplicitProperties.Where(p => p.Name == "X% increased Physical Damage").SingleOrDefault();
+            var minPhysicalDamageAddedProperty = weapon.MagicProperties.Where(p => p.Name == "Adds X Min Physical Damage").SingleOrDefault();
+            var maxPhysicalDamageAddedProperty = weapon.MagicProperties.Where(p => p.Name == "Adds X Max Physical Damage").SingleOrDefault();
+            var increasedPhysicalDamageProperty = weapon.MagicProperties.Where(p => p.Name == "X% increased Physical Damage").SingleOrDefault();
             var minPhysicalDamageAdded = minPhysicalDamageAddedProperty != null ? minPhysicalDamageAddedProperty.Value : 0;
             var maxPhysicalDamageAdded = maxPhysicalDamageAddedProperty != null ? maxPhysicalDamageAddedProperty.Value : 0;
             var increasedPhysicalDamage = increasedPhysicalDamageProperty != null ? increasedPhysicalDamageProperty.Value : 0;
 
-            var physicalDamageMultiplier = 1 + ((decimal)weapon.Quality / 100) + ((decimal)increasedPhysicalDamage / 100);
-            var physicalDpsBeforeMultiplier = weapon.PhysicalDps / physicalDamageMultiplier;
-            weapon.PhysicalDpsWithMaxQuality = physicalDpsBeforeMultiplier * (1 + 0.2M + ((decimal)increasedPhysicalDamage / 100));
+            WeaponDamageJsonObject baseDamage;
+            if (_weaponBaseDamage.TryGetValue(weapon.Base, out baseDamage))
+            {
+                var minDamageWithAddedPhysical = baseDamage.min + minPhysicalDamageAdded;
+                var maxDamageWithAddedPhysical = baseDamage.max + maxPhysicalDamageAdded;
+                var minDamageWithMultiplier = minDamageWithAddedPhysical * (1 + 0.2M + ((decimal)increasedPhysicalDamage / 100));
+                var maxDamageWithMultiplier = maxDamageWithAddedPhysical * (1 + 0.2M + ((decimal)increasedPhysicalDamage / 100));
+                weapon.PhysicalDpsWithMaxQuality = (decimal)(minDamageWithMultiplier + maxDamageWithMultiplier) * weapon.AttacksPerSecond / 2;
+                weapon.DpsWithMaxQuality = weapon.PhysicalDpsWithMaxQuality + weapon.ElementalDps;
+            }
+            else
+            {
+                //TODO: Log
+                Console.WriteLine("Couldn't calculate DPS - unknown item type: " + weapon.Base);
+            }
+        }
 
-            // divide by 1 + quality + added physical damage
+        private void ParseArmorSpecificProperties(Armor armor, List<PropertyJsonObject> jsonProperties)
+        {
+            if (jsonProperties != null)
+            {
+                var armour = jsonProperties.Where(p => p.name == "Armour").Select(p => p.values).SingleOrDefault();
+                var evasionRating = jsonProperties.Where(p => p.name == "Evasion Rating").Select(p => p.values).SingleOrDefault();
+                var energyShield = jsonProperties.Where(p => p.name == "Energy Shield").Select(p => p.values).SingleOrDefault();
 
+                if (armour != null)
+                {
+                    var armourString = ((string)((JArray)armour[0])[0]);
+                    armor.Armour = int.Parse(armourString);
+                    armor.ArmourWithMaxQuality = armor.Quality != 20 ? (int)((armor.Armour / (1M + (decimal)armor.Quality / 100M)) * 1.2M) : armor.Armour;
+                }
+
+                if (evasionRating != null)
+                {
+                    var evasionRatingString = ((string)((JArray)evasionRating[0])[0]);
+                    armor.EvasionRating = int.Parse(evasionRatingString);
+                    armor.EvasionRatingWithMaxQuality = armor.Quality != 20 ? (int)((armor.EvasionRating / (1M + (decimal)armor.Quality / 100M)) * 1.2M) : armor.EvasionRating;
+                }
+
+                if (energyShield != null)
+                {
+                    var energyShieldString = ((string)((JArray)energyShield[0])[0]);
+                    armor.EnergyShield = int.Parse(energyShieldString);
+                    armor.EnergyShieldWithMaxQuality = armor.Quality != 20 ? (int)((armor.EnergyShield / (1M + (decimal)armor.Quality / 100M)) * 1.2M) : armor.EnergyShield;
+                }
+            }
         }
 
         private class ReqiuirementJsonObject

@@ -1,6 +1,7 @@
 ﻿using PoeSniper.PoeSniper.Model;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,7 @@ namespace PoeSniper
             List<string> propertyStrings,
             List<string> propertyStringList,
             bool isCorruptedOrUnique,
+            bool isImplicit,
             List<string> nonCorruptedNonUniquePropertyStringList)
         {
             List<MagicProperty> result = new List<MagicProperty>();
@@ -38,8 +40,8 @@ namespace PoeSniper
                     if (staticCorruptedImplictProperties.Contains(propertyString) ||
                         staticUniqueItemMagicProperties.Contains(propertyString))
                     {
-                        var staticCorruptedProperty = new MagicProperty { Name = propertyString };
-                        result.Add(staticCorruptedProperty);
+                        var staticCorruptedOrUniqueProperty = new MagicProperty { Name = propertyString, IsImplicit = isImplicit };
+                        result.Add(staticCorruptedOrUniqueProperty);
                         continue;
                     }
                 }
@@ -48,7 +50,8 @@ namespace PoeSniper
                 // if more properties like that appear - consider adding file for them
                 if (propertyString == "Has 1 Socket")
                 {
-                    var hasSocketProperty = new MagicProperty { Name = propertyString };
+                    Debug.Assert(isImplicit, "Expecting corrupted mod to be implicit!");
+                    var hasSocketProperty = new MagicProperty { Name = propertyString, IsImplicit = isImplicit };
                     AddPropertyToPropertyStringList(hasSocketProperty.Name, propertyStringList, isCorruptedOrUnique, nonCorruptedNonUniquePropertyStringList);
 
                     result.Add(hasSocketProperty);
@@ -77,7 +80,7 @@ namespace PoeSniper
                 if (match.Success)
                 {
                     var value = match.Groups["value"].Value;
-                    var genericProperty = new MagicProperty { Value = int.Parse(value), Name = propertyString.Replace(value, "X") };
+                    var genericProperty = new MagicProperty { Value = int.Parse(value), Name = propertyString.Replace(value, "X"), IsImplicit = isImplicit };
                     AddPropertyToPropertyStringList(genericProperty.Name, propertyStringList, isCorruptedOrUnique, nonCorruptedNonUniquePropertyStringList);
 
                     result.Add(genericProperty);

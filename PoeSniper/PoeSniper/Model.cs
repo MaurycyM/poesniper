@@ -7,13 +7,33 @@ using System.Threading.Tasks;
 namespace PoeSniper
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
     namespace PoeSniper.Model
     {
+        public class PoeSniperContext : DbContext
+        {
+            public DbSet<Forum> Forums { get; set; }
+            public DbSet<ShopThread> ShopThreads { get; set; }
+            public DbSet<Weapon> Weapons { get; set; }
+            public DbSet<Armor> Armors { get; set; }
+            public DbSet<Item> Items { get; set; }
+
+            public DbSet<User> Users { get; set; }
+
+            protected override void OnModelCreating(DbModelBuilder modelBuilder)
+            {
+                modelBuilder.Entity<Forum>().HasMany(f => f.ShopThreads).WithRequired().HasForeignKey(k => k.ForumId).WillCascadeOnDelete();
+                modelBuilder.Entity<ShopThread>().HasMany(t => t.Items).WithRequired().WillCascadeOnDelete();
+                modelBuilder.Entity<Item>().HasMany(i => i.MagicProperties).WithRequired().WillCascadeOnDelete();
+                modelBuilder.Entity<Item>().HasMany(i => i.Sockets).WithRequired().WillCascadeOnDelete();
+            }
+        }
+
         public enum League
         {
             Standard,
@@ -68,6 +88,28 @@ namespace PoeSniper
             Staff,
         };
 
+        public class Forum
+        {
+            public int Id { get; set; }
+            public string Url { get; set; }
+            public DateTime LastShopThreadDate { get; set; }
+            public int LastShopThreadPage { get; set; }
+            public League League { get; set; }
+            public ICollection<ShopThread> ShopThreads { get; set; }
+        }
+
+        public class ShopThread
+        {
+            public int Id { get; set; }
+            public string Url { get; set; }
+            public string SellerIgn { get; set; }
+            public DateTime LastUpdate { get; set; }
+            public ICollection<Item> Items { get; set; }
+
+            public int ForumId { get; set; }
+            public Forum Forum { get; set; }
+        }
+
         public class Item
         {
             public int Id { get; set; }
@@ -81,21 +123,17 @@ namespace PoeSniper
             
             public int Quality { get; set; } 
             public Requirements Requirements { get; set; }
-            public List<MagicProperty> ImplicitProperties { get; set; }
-            public List<MagicProperty> ExplicitProperties { get; set; }
+            public List<MagicProperty> MagicProperties { get; set; }
+            //public List<MagicProperty> ImplicitProperties { get; set; }
+            //public List<MagicProperty> ExplicitProperties { get; set; }
             public List<GemSocket> Sockets { get; set; }
 
             public League League { get; set; }
             public ShopThread ShopThread { get; set; }
-            public Price Price { get; set; }
+            public Currency? PriceCurrency { get; set; }
+            public decimal? PriceAmount { get; set; }
 
-            public DateTime PostDate { get; set; }
-        }
-
-        public class Price
-        {
-            public Currency Currency { get; set; }
-            public decimal Amount { get; set; }
+            //public DateTime PostDate { get; set; }
         }
 
         public class Weapon : Item
@@ -124,8 +162,11 @@ namespace PoeSniper
         public class Armor : Item
         {
             public int Armour { get; set; }
-            public int Evasion { get; set; }
+            public int ArmourWithMaxQuality { get; set; }
+            public int EvasionRating { get; set; }
+            public int EvasionRatingWithMaxQuality { get; set; }
             public int EnergyShield { get; set; }
+            public int EnergyShieldWithMaxQuality { get; set; }
         }
 
         // complex type
@@ -140,6 +181,7 @@ namespace PoeSniper
         public class MagicProperty
         {
             public int Id { get; set; }
+            public bool IsImplicit { get; set; }
             public string Name { get; set; }
             public int Value { get; set; }
         }
@@ -151,23 +193,12 @@ namespace PoeSniper
             public bool isLinked { get; set; }
         }
 
-        public class Forum
+        // TODO: use identity
+        public class User
         {
             public int Id { get; set; }
-            public string Url { get; set; }
-            public DateTime LastShopThreadDate { get; set; }
-            public int LastShopThreadPage { get; set; }
-            public League League { get; set; }
-            public ICollection<ShopThread> ShopThreads { get; set; }
-        }
-
-        public class ShopThread
-        {
-            public int Id { get; set; }
-            public string Url { get; set; }
-            public string SellerIgn { get; set; }
-            public DateTime LastUpdate { get; set; }
-            public ICollection<Item> Items { get; set; }
+            public string UserName { get; set; }
+            public ICollection<LookingForItem> LookingForItems { get; set; }
         }
 
         public class LookingForItem
@@ -176,7 +207,8 @@ namespace PoeSniper
             public bool? isCorrupted { get; set; }
             public League League { get; set; }
             public LookingForItemType ItemType { get; set; }
-            public Price MaxPrice { get; set; }
+            public Currency? MaxPriceCurrency { get; set; }
+            public decimal? MaxPriceAmount { get; set; }
             public LookingForRequirements MaxRequirements { get; set; }
             public List<LookingForMagicProperty> ImplicitProperties { get; set; }
             public List<LookingForMagicProperty> ExplicitProperties { get; set; }
@@ -222,12 +254,12 @@ namespace PoeSniper
             public decimal? MinAttacksPerSecond { get; set; }
             public decimal? MaxAttacksPerSecond { get; set; }
 
-            public decimal? MinPhysicalDps { get; set; }
-            public decimal? MaxPhysicalDps { get; set; }
+            //public decimal? MinPhysicalDps { get; set; }
+            //public decimal? MaxPhysicalDps { get; set; }
+            //public decimal? MinDps { get; set; }
+            //public decimal? MaxDps { get; set; }
             public decimal? MinElementalDps { get; set; }
             public decimal? MaxElementalDps { get; set; }
-            public decimal? MinDps { get; set; }
-            public decimal? MaxDps { get; set; }
             public decimal? MinPhysicalDpsWithMaxQuality { get; set; }
             public decimal? MaxPhysicalDpsWithMaxQuality { get; set; }
             public decimal? MinDpsWithMaxQuality { get; set; }
@@ -236,12 +268,12 @@ namespace PoeSniper
 
         public class LookingForArmorProperties
         {
-            public int? MinArmour { get; set; }
-            public int? MaxArmour { get; set; }
-            public int? MinEvasion { get; set; }
-            public int? MaxEvasion { get; set; }
-            public int? MinEnergyShield { get; set; }
-            public int? MaxEnergyShield { get; set; }
+            public int? MinArmourWithMaxQuality { get; set; }
+            public int? MaxArmourWithMaxQuality { get; set; }
+            public int? MinEvasionWithMaxQuality { get; set; }
+            public int? MaxEvasionWithMaxQuality { get; set; }
+            public int? MinEnergyShieldWithMaxQuality { get; set; }
+            public int? MaxEnergyShieldWithMaxQuality { get; set; }
         }
 
         public enum LookingForItemType

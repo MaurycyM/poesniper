@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 
             protected override void OnModelCreating(DbModelBuilder modelBuilder)
             {
+                modelBuilder.Entity<Forum>().ToTable("Forums");
                 modelBuilder.Entity<Forum>().HasMany(f => f.ShopThreads).WithRequired().HasForeignKey(k => k.ForumId).WillCascadeOnDelete();
                 modelBuilder.Entity<ShopThread>().HasMany(t => t.Items).WithRequired().WillCascadeOnDelete();
                 modelBuilder.Entity<Item>().HasMany(i => i.MagicProperties).WithRequired().WillCascadeOnDelete();
@@ -183,7 +184,7 @@ using System.Threading.Tasks;
             public int Id { get; set; }
             public bool IsImplicit { get; set; }
             public string Name { get; set; }
-            public int Value { get; set; }
+            public int? Value { get; set; }
         }
 
         public class GemSocket

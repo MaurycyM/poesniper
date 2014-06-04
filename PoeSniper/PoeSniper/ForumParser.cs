@@ -13,11 +13,18 @@ using System.Threading.Tasks;
 
 namespace PoeSniper
 {
+    public class GetNewShopThreadsResult
+    {
+        public int LastFetchPage { get; set; }
+        public DateTime LastShopThreadDate { get; set; }
+        public List<Tuple<string, DateTime>> NewShopThreads { get; set; }
+    }
+
     public class ForumParser
     {
         private Dictionary<string, string> _forumsDictionary;
         private List<Forum> _forums;
-        //private string _forumUrl = "http://www.pathofexile.com/forum/view-forum/509";
+        private const string forumsFileLocation = @"Data\forums.dat";
 
         private Regex _findShopsRegex = new Regex(@"<div><a href=""/forum/view-thread/(?<thread>\d+)", RegexOptions.Compiled);
         private Regex _threadRegex = new Regex(@"<td class=""thread"">.+<td class=""replies"">", RegexOptions.Compiled);
@@ -37,7 +44,7 @@ namespace PoeSniper
 
         private void InitializeForums() 
         {
-            var forumsString = File.ReadAllText(@"Data\forums.dat");
+            var forumsString = File.ReadAllText(forumsFileLocation);
             _forumsDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(forumsString);
             using (var context = new PoeSniperContext())
             {
@@ -54,6 +61,7 @@ namespace PoeSniper
                             ShopThreads = new List<ShopThread>(),
                         };
 
+                        Console.WriteLine("Created new forum: " + newForum.Url + "League: " + newForum.League);
                         context.Forums.Add(newForum);
                     }
                 }
@@ -68,24 +76,33 @@ namespace PoeSniper
         {
             foreach (var forum in _forums)
             {
-                var perndingThreads = await GetNewShopThreads(forum);
-                foreach (var shopThread in perndingThreads)
+                var getNewShopThreadsResult = await GetNewShopThreads(forum);
+                foreach (var shopThread in getNewShopThreadsResult.NewShopThreads)
                 {
                     await _threadParser.ParseThread(forum, _threadTemplateUrl + shopThread.Item1, shopThread.Item2);
+                }
+
+                forum.LastShopThreadPage = getNewShopThreadsResult.LastFetchPage;
+                forum.LastShopThreadDate = getNewShopThreadsResult.LastShopThreadDate;
+                using (var context = new PoeSniperContext())
+                {
+                    context.Entry<Forum>(forum).State = EntityState.Modified;
+                    context.SaveChanges();
                 }
             }
         }
 
-        public async Task<List<Tuple<string, DateTime>>> GetNewShopThreads(Forum forum)//string forumUrl, int lastFetchPage, DateTime lastFetchDate)
+        public async Task<GetNewShopThreadsResult> GetNewShopThreads(Forum forum)
         {
             var forumUrl = forum.Url + @"/orderby/post-time/order/asc/page/";
 
             // scan few pages earlier than last time in case some posts get lost due to timing issues when people update them
             // we look at the last post date so we will not process the same thread twice, unless it was updated
-            var lastFetchPage = Math.Max(forum.LastShopThreadPage - 3, 1); 
+            var lastFetchPage = Math.Max(forum.LastShopThreadPage - 2, 1); 
+            var lastShopThreadDate = forum.LastShopThreadDate;
             
             bool done = false;
-            var result = new List<Tuple<string, DateTime>>();
+            var newShopThreads = new List<Tuple<string, DateTime>>();
             while (!done)
             {
                 string forumBody = string.Empty;
@@ -132,24 +149,25 @@ namespace PoeSniper
 
                 var threads = shopThreadIds.Zip(lastPostDates, (t, d) => new Tuple<string, DateTime>(t, d));
 
-                var filteredThreads = threads.Where(t => t.Item2 > forum.LastShopThreadDate);
-                result.AddRange(filteredThreads);
+                // TODO: if two threads are updated at the same time we may lose the information about one of them
+                var filteredThreads = threads.Where(t => t.Item2 > lastShopThreadDate);
+                newShopThreads.AddRange(filteredThreads);
                 lastFetchPage++;
 
-                // TODO: move this to AFTER threads have been processed, so that items wont get lost in case of error
-                forum.LastShopThreadDate = forum.LastShopThreadDate > lastPostDates.Last() ? forum.LastShopThreadDate : lastPostDates.Last();
+                lastShopThreadDate = lastShopThreadDate > lastPostDates.Last() ? lastShopThreadDate : lastPostDates.Last();
 
-                Console.WriteLine("So far discovered " + result.Count() + " threads. Page: " + lastFetchPage);
+                // TODO: LOG
+                Console.WriteLine("So far discovered " + newShopThreads.Count() + " threads. Page: " + lastFetchPage);
             }
 
-            forum.LastShopThreadPage = lastFetchPage;
-            using (var context = new PoeSniperContext())
+            var result = new GetNewShopThreadsResult
             {
-                context.Entry<Forum>(forum).State = EntityState.Modified;
-                context.SaveChanges();
-            }
+                LastFetchPage = lastFetchPage,
+                LastShopThreadDate = lastShopThreadDate,
+                NewShopThreads = newShopThreads,
+            };
 
-            return result.ToList();
+            return result;
         }
     }
 }

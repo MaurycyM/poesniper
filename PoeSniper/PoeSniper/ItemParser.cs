@@ -46,9 +46,6 @@ namespace PoeSniper
             "Belt",
         };
 
-        //private List<string> staticCorruptedImplictProperties = new List<string>();
-        //private List<string> staticUniqueItemMagicProperties = new List<string>();
-
         private class WeaponDamageJsonObject
         {
             public int min { get; set; }
@@ -58,33 +55,29 @@ namespace PoeSniper
         private MagicPropertiesParser _magicPropertiesParser;
         private SocketsParser _socketsParser;
         private Dictionary<string, string> _itemBaseTypeMapping = new Dictionary<string, string>();
+        private Dictionary<string, WeaponDamageJsonObject> _weaponBaseDamage;
         private string[] _itemPrefixes;
         private string[] _itemSuffixes;
-        private Dictionary<string, WeaponDamageJsonObject> _weaponBaseDamage;
+        private const string _itemPrefixesFileLocation = @"Data\ItemPrefixes.dat";
+        private const string _itemSuffixesFileLocation = @"Data\ItemSuffixes.dat";
+        private const string _itemBasesFileLocation = @"Data\ItemBases.dat";
+        private const string _weaponBaseDamageFileLocation = @"Data\WeaponBaseDamage.dat";
 
         public ItemParser()
         {
             _magicPropertiesParser = new MagicPropertiesParser();
             _socketsParser = new SocketsParser();
 
-            _itemPrefixes = File.ReadAllLines(@"Data\itemPrefixes.dat");
-            _itemSuffixes = File.ReadAllLines(@"Data\itemSuffixes.dat");
-            var itemBasesString = File.ReadAllText(@"Data\itemBases.dat");
+            _itemPrefixes = File.ReadAllLines(_itemPrefixesFileLocation);
+            _itemSuffixes = File.ReadAllLines(_itemSuffixesFileLocation);
+            
+            var itemBasesString = File.ReadAllText(_itemBasesFileLocation);
             var itemBases = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(itemBasesString);
             _itemBaseTypeMapping = itemBases.SelectMany(i => i.Value, (o, i) => new { type = o.Key, item = i }).ToDictionary(k => k.item, e => e.type);
-
-            var weaponBaseDamage = File.ReadAllText(@"Data\weaponBaseDamage.dat");
+            
+            var weaponBaseDamage = File.ReadAllText(_weaponBaseDamageFileLocation);
             _weaponBaseDamage = JsonConvert.DeserializeObject<Dictionary<string, WeaponDamageJsonObject>>(weaponBaseDamage);
-
-            //staticCorruptedImplictProperties = File.ReadAllLines(@"Data/staticCorruptedImplicitProperties.dat").ToList();
-            //staticUniqueItemMagicProperties = File.ReadAllLines(@"Data/staticUniqueItemMagicProperties.dat").ToList();
         }
-
-        private List<string> explicitProps = new List<string>();
-        private List<string> implicitProps = new List<string>();
-        private List<string> corruptedImplicitProps = new List<string>();
-        private List<string> uniqueItemProps = new List<string>();
-
 
         // try to find item base - first match the name with the dictionary of item bases (for normal, rares and uniques)
         // if that doesn't work, try to trim prefix and suffix (for magic items)
@@ -131,12 +124,6 @@ namespace PoeSniper
                 return null;
             }
 
-            // TEMP
-            explicitProps = File.ReadAllLines(@"Data/explicitMagicProperties.dat").ToList();
-            implicitProps = File.ReadAllLines(@"Data/implicitMagicProperties.dat").ToList();
-            corruptedImplicitProps = File.ReadAllLines(@"Data/corruptedImplicitProperties.dat").ToList();
-            uniqueItemProps = File.ReadAllLines(@"Data/uniqeItemMagicProperties.dat").ToList();
-
             Item result = null;
             string itemType;
             string itemBase;
@@ -163,6 +150,13 @@ namespace PoeSniper
 
                 result.Name = itemJson.name;
                 result.Type = (ItemType)Enum.Parse(typeof(ItemType), (string)itemType.Replace(" ", ""));
+
+                // TODO: is this needed?
+                if (result.Type == ItemType.Currency || result.Type == ItemType.Gem || result.Type == ItemType.Map || result.Type == ItemType.VaalFragment)
+                {
+                    return null;
+                }
+
                 result.Base = itemBase;
                 result.IsVerified = itemJson.verified;
                 result.IsIdentified = itemJson.identified;
@@ -182,33 +176,14 @@ namespace PoeSniper
 
                 if (itemJson.implicitMods != null)
                 {
-                    if (itemJson.corrupted)
-                    {
-                        var implicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.implicitMods, corruptedImplicitProps, true, true, implicitProps);
-                        result.MagicProperties.AddRange(implicitProperties);
-                    }
-                    else
-                    {
-                        var implicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.implicitMods, implicitProps, false, true, null);
-                        result.MagicProperties.AddRange(implicitProperties);
-                    }
+                    var implicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.implicitMods, true, isUnique: false /*for implicit props it doesnt matter */);
+                    result.MagicProperties.AddRange(implicitProperties);
                 }
 
-                if (result.Type != ItemType.Currency && result.Type != ItemType.Gem && result.Type != ItemType.Map && result.Type != ItemType.VaalFragment)
+                if (itemJson.explicitMods != null)
                 {
-                    if (itemJson.explicitMods != null)
-                    {
-                        if (itemJson.flavourText != null)
-                        {
-                            var explicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.explicitMods, uniqueItemProps, true, false, explicitProps);
-                            result.MagicProperties.AddRange(explicitProperties);
-                        }
-                        else
-                        {
-                            var explicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.explicitMods, explicitProps, false, false, null);
-                            result.MagicProperties.AddRange(explicitProperties);
-                        }
-                    }
+                    var explicitProperties = _magicPropertiesParser.ParseMagicProperties(itemJson.explicitMods, false, itemJson.flavourText != null);
+                    result.MagicProperties.AddRange(explicitProperties);
                 }
 
                 if (itemJson.sockets != null && itemJson.sockets.Count > 0)
@@ -227,37 +202,17 @@ namespace PoeSniper
                 {
                     ParseArmorSpecificProperties(armor, itemJson.properties);
                 }
-
-
-
-
-
             }
             else
             {
-                // TODO: logging etc
-
                 Console.WriteLine("UNKNOWN ITEM!!!");
                 Console.WriteLine("Item type: " + itemType + " TypeLine: " + itemJson.typeLine + " Name: " + itemJson.name);
                 Console.WriteLine();
                 return null;
             }
 
-            // temp
-            //File.WriteAllLines(@"Data/explicitMagicProperties.dat", explicitProps);
-            //File.WriteAllLines(@"Data/implicitMagicProperties.dat", implicitProps);
-            //File.WriteAllLines(@"Data/corruptedImplicitProperties.dat", corruptedImplicitProps);
-            //File.WriteAllLines(@"Data/uniqeItemMagicProperties.dat", uniqueItemProps);
-
-            if (result.Name == "Empyrean Brand")
-            {
-                Console.WriteLine("fdfsd");
-            }
-
             return result;
-
         }
-
 
         private void ParseWeaponSpecificProperties(Weapon weapon, List<PropertyJsonObject> jsonProperties)
         {

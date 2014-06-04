@@ -36,8 +36,9 @@ namespace PoeSniper
             }
 
 
-            var priceParser = new ShopThreadPriceParser();
-            priceParser.ParseShopThreadPrices(shopThreadBody);
+            // TODO: needs more work
+            //var priceParser = new ShopThreadPriceParser();
+            //priceParser.ParseShopThreadPrices(shopThreadBody);
 
             var itemParser = new ItemParser();
             var itemsString = itemStringRegex.Match(shopThreadBody).Groups["items"];

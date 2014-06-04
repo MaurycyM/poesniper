@@ -65,43 +65,31 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Data\corruptedImplicitProperties.dat">
+    <None Include="Data\ExplicitProperties.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\dynamicCorruptedImplicitProperties.dat">
+    <None Include="Data\Forums.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\dynamicUniqeItemMagicProperties.dat">
+    <None Include="Data\ImplicitProperties.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\forums.dat">
+    <None Include="Data\ItemBases.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\implicitMagicProperties.dat">
+    <None Include="Data\ItemPrefixes.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\itemBases.dat">
+    <None Include="Data\ItemSuffixes.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\explicitMagicProperties.dat">
+    <None Include="Data\StaticExplicitProperties.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\itemPrefixes.dat">
+    <None Include="Data\StaticImplicitProperties.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\itemSuffixes.dat">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\staticCorruptedImplicitProperties.dat">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\staticUniqueItemMagicProperties.dat">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\uniqeItemMagicProperties.dat">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\weaponBaseDamage.dat">
+    <None Include="Data\WeaponBaseDamage.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />

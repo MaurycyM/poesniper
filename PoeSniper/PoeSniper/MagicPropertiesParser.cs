@@ -133,7 +133,7 @@ namespace PoeSniper
                 // TODO: this is just to build list of non-unique properties first, can be removed once this is done
                 if (isUnique)
                 {
-                    Console.WriteLine("Unknown property: '" + propertyString + "' on unique item - skipping");
+                    //Console.WriteLine("Unknown property: '" + propertyString + "' on unique item - skipping");
                     return;
                 }
 
